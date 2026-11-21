@@ -1,0 +1,4 @@
+project_id = "wcubfrmfylvrdwweothd"
+
+[functions.calificaciones-bienestar]
+verify_jwt = false
