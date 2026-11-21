@@ -23,6 +23,23 @@ jobs:
     steps:
       - name: Descargar codigo
         uses: actions/checkout@v6
+      - name: Comprobar API de Supabase y permisos
+        run: |
+          curl --fail --silent --show-error --retry 3 --retry-delay 3 --max-time 30 \
+            "https://wcubfrmfylvrdwweothd.supabase.co/functions/v1/calificaciones-bienestar?action=catalog" \
+            -o /tmp/catalogo-bienestar.json
+          python3 - <<'PY'
+          import json
+          with open('/tmp/catalogo-bienestar.json', encoding='utf-8') as f:
+              data = json.load(f)
+          assert len(data.get('cargos', [])) == 6, "No se recuperaron los seis cargos"
+          assert len(data.get('areas', [])) == 20, "El catalogo de areas no esta disponible"
+          print("OK: seis cargos y veinte areas disponibles")
+          PY
+          status=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 \
+            "https://wcubfrmfylvrdwweothd.supabase.co/functions/v1/calificaciones-bienestar?action=results")
+          test "$status" = "401"
+          echo "OK: los resultados no son publicos"
       - name: Preparar GitHub Pages
         uses: actions/configure-pages@v5
       - name: Subir archivos del sitio
