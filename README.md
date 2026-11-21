@@ -14,21 +14,22 @@ Encuesta anónima de satisfacción para Bienestar Institucional del Club Campest
 - Código backend: `supabase/functions/calificaciones-bienestar/index.ts`
 
 ## Publicación
-Cada commit a la rama **main** ejecuta automáticamente el workflow `.github/workflows/deploy.yml` de GitHub Actions.
-El último despliegue comprobado en Actions terminó correctamente. URL prevista del sitio:
+La aplicación se publica automáticamente mediante **GitHub Pages (publicación desde main)**. El workflow `.github/workflows/deploy.yml` verifica la sintaxis JavaScript, los 6 cargos, las 20 áreas y los permisos de la API antes de dar por válidas las pruebas.
+Sitio web:
 https://mrprogramer1997.github.io/Calificaciones-Bienestar/
 
 El acceso administrativo está en:
 https://mrprogramer1997.github.io/Calificaciones-Bienestar/#admin
 
-Si Pages se deshabilita, configurar en GitHub **Settings → Pages → Source: GitHub Actions**.
+Si Pages se deshabilita, comprobar en GitHub **Settings → Pages → Deploy from a branch → main / (root)**.
 
-Los seis enlaces públicos usan `?cargo=<slug>`. Se pueden obtener los QR desde el dashboard o desde el paquete entregado aparte. Verificar cada código antes de imprimir.
+Los seis enlaces públicos usan `?cargo=<slug>`. El dashboard identifica cada QR con su cargo en pantalla y permite imprimir el cartel **sin mostrar ese cargo**. También se entregaron seis carteles PNG independientes con los códigos QR verificados, sin logotipo ficticio ni nombres impresos.
 
 ## Indicadores
 - Evaluaciones totales, promedio (1-5), distribución de respuestas y porcentaje de satisfacción.
 - Satisfacción = (calificaciones de 4 o 5 / evaluaciones recibidas) * 100.
-- Filtros por cargo, área y fechas; observaciones; exportación Excel.
+- Filtros por cargo, área y fechas; observaciones; comparación de áreas con mayor volumen, mayor satisfacción y menor satisfacción.
+- Exportación Excel (.xlsx) con hojas Valoraciones, Indicadores, Por cargo, Por área y Comentarios; exporta todos los registros filtrados.
 - Dashboard web refresca cada 60 segundos. Excel descargado es una instantánea, no un archivo sincronizado en tiempo real.
 
 ## Seguridad
@@ -44,4 +45,4 @@ Los seis enlaces públicos usan `?cargo=<slug>`. Se pueden obtener los QR desde 
 2. Implementar limitación de envíos por IP o mecanismo anti-abuso en el perímetro de la función pública.
 3. Rotar la contraseña inicial compartida durante la configuración.
 4. Si se necesita un Excel siempre sincronizado, integrar almacenamiento en OneDrive/SharePoint con proceso de actualización, en lugar del archivo descargado.
-5. La plantilla exportada presenta indicadores y datos filtrables, pero los gráficos interactivos se muestran en el dashboard web.
+5. El Excel exportado incluye hojas de resumen y datos filtrables; los gráficos interactivos se visualizan en el dashboard web.
