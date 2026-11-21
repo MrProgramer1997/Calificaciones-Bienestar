@@ -107,8 +107,107 @@ function renderAreaInsights(){
 function renderDashboard(){selected=filtered();const n=selected.length,satisfied=selected.filter(v=>v.calificacion>=4).length,comments=selected.filter(v=>v.comentario?.trim()).length,avg=n?(selected.reduce((s,v)=>s+v.calificacion,0)/n).toFixed(2):"0.00";$("totalKpi").textContent=n.toLocaleString("es-CO");$("satKpi").textContent=percent(satisfied,n)+"%";$("avgKpi").textContent=avg;$("commentsKpi").textContent=comments;renderAreaInsights();renderBars("distribution",labels.map((label,i)=>({label:emojis[i]+" "+label,pct:percent(selected.filter(v=>v.calificacion===i+1).length,n)})));renderBars("byCargo",catalog.cargos.map(c=>{const group=selected.filter(v=>v.cargo_id===c.id);return {label:c.nombre.replace("Coordinadora de ","").replace("Analista de ","").replace("Directora de ","").slice(0,21),pct:percent(group.filter(v=>v.calificacion>=4).length,group.length)}}));const wrap=$("records");wrap.replaceChildren();const t=document.createElement("table"),head=document.createElement("tr");["Fecha","Cargo","Área","Calificación","Comentario"].forEach(x=>{const th=document.createElement("th");th.textContent=x;head.append(th)});t.append(head);selected.slice(0,200).forEach(v=>{const tr=document.createElement("tr");[fmtDate(v.creado_en),nameBy(catalog.cargos,v.cargo_id),nameBy(catalog.areas,v.area_id),labels[v.calificacion-1]+" ("+v.calificacion+")",v.comentario||"—"].forEach(x=>{const td=document.createElement("td");td.textContent=x;tr.append(td)});t.append(tr)});wrap.append(t);if(selected.length>200){const p=document.createElement("p");p.className="muted";p.textContent="Mostrando 200 registros. El Excel incluye todos los resultados filtrados.";wrap.append(p)}}
 ["filterCargo","filterArea","dateFrom","dateTo"].forEach(id=>$(id).addEventListener("change",renderDashboard));$("refresh").onclick=loadResults;
 $("logout").onclick=async()=>{try{await api("logout",{},true)}catch{}token="";sessionStorage.removeItem("bienestar_token");showLogin()};
-function renderQR(){const el=$("qrGrid");el.replaceChildren();catalog.cargos.forEach(c=>{const link=base+"?cargo="+encodeURIComponent(c.slug),div=document.createElement("div");div.className="qrbox";const img=document.createElement("img");img.loading="lazy";img.alt="QR "+c.nombre;img.src="https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=12&data="+encodeURIComponent(link);const label=document.createElement("strong");label.textContent=c.nombre;const a=document.createElement("a");a.href=link;a.textContent="Abrir formulario";a.target="_blank";div.append(img,label,a);el.append(div)})}
-$("export").onclick=async()=>{if(typeof ExcelJS==="undefined")return alert("No se pudo cargar el generador Excel. Comprueba la conexión a Internet.");const wb=new ExcelJS.Workbook();wb.creator="Bienestar Institucional";const sh=wb.addWorksheet("Valoraciones");sh.columns=[{header:"Fecha",key:"fecha",width:24},{header:"Cargo",key:"cargo",width:49},{header:"Área",key:"area",width:26},{header:"Calificación",key:"calificacion",width:16},{header:"Valoración",key:"etiqueta",width:18},{header:"Satisfactoria",key:"satisfecha",width:18},{header:"Comentario",key:"comentario",width:70}];selected.forEach(v=>sh.addRow({fecha:fmtDate(v.creado_en),cargo:nameBy(catalog.cargos,v.cargo_id),area:nameBy(catalog.areas,v.area_id),calificacion:v.calificacion,etiqueta:labels[v.calificacion-1],satisfecha:v.calificacion>=4?"Sí":"No",comentario:v.comentario||""}));sh.autoFilter={from:"A1",to:"G1"};sh.getRow(1).font={bold:true,color:{argb:"FFFFFFFF"}};sh.getRow(1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF004AA1"}};sh.views=[{state:"frozen",ySplit:1}];const summary=wb.addWorksheet("Indicadores");summary.columns=[{header:"Indicador",key:"label",width:48},{header:"Valor",key:"value",width:22}];const total=selected.length;summary.addRow(["Total de evaluaciones",total]);summary.addRow(["Porcentaje de satisfacción",percent(selected.filter(v=>v.calificacion>=4).length,total)/100]);summary.getCell("B3").numFmt="0.0%";labels.forEach((v,i)=>{summary.addRow([v,selected.filter(x=>x.calificacion===i+1).length]);summary.addRow(["Porcentaje "+v,percent(selected.filter(x=>x.calificacion===i+1).length,total)/100]);summary.getCell(summary.rowCount,2).numFmt="0.0%"});catalog.cargos.forEach(c=>{const a=selected.filter(v=>v.cargo_id===c.id);summary.addRow(["Satisfacción: "+c.nombre,percent(a.filter(v=>v.calificacion>=4).length,a.length)/100]);summary.getCell(summary.rowCount,2).numFmt="0.0%"});const bytes=await wb.xlsx.writeBuffer();const u=URL.createObjectURL(new Blob([bytes],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));const a=document.createElement("a");a.href=u;a.download="Calificaciones_Bienestar_"+new Date().toISOString().slice(0,10)+".xlsx";a.click();setTimeout(()=>URL.revokeObjectURL(u),3000)};
+
+function renderQR(){
+ const el=$("qrGrid");el.replaceChildren();
+ catalog.cargos.forEach(c=>{
+  const link=base+"?cargo="+encodeURIComponent(c.slug),div=document.createElement("div");div.className="qrbox";
+  const img=document.createElement("img");img.loading="lazy";img.alt="QR de "+c.nombre;
+  img.src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=12&data="+encodeURIComponent(link);
+  const label=document.createElement("strong");label.textContent=c.nombre;
+  const a=document.createElement("a");a.href=link;a.textContent="Abrir formulario";a.target="_blank";a.rel="noopener noreferrer";
+  const print=document.createElement("button");print.className="secondary";print.type="button";print.textContent="Imprimir sin nombre";
+  print.onclick=()=>printPoster(link);
+  div.append(img,label,a,document.createElement("div"),print);el.append(div)
+ })
+}
+function printPoster(link){
+ const sheet=$("printSheet");sheet.replaceChildren();
+ const title=document.createElement("div");title.className="printheading";title.textContent="Club Campestre de Pereira";
+ const subtitle=document.createElement("div");subtitle.className="printsubtitle";subtitle.textContent="Bienestar Institucional · Encuesta anónima";
+ const heading=document.createElement("div");heading.className="printtitle";heading.textContent="Escanea y califica la atención";
+ const qr=document.createElement("img");qr.alt="Código QR de encuesta";
+ qr.src="https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&margin=24&data="+encodeURIComponent(link);
+ const footer=document.createElement("div");footer.className="printfooter";footer.textContent="Tu opinión nos ayuda a mejorar";
+ sheet.append(title,subtitle,heading,qr,footer);
+ const restore=()=>document.body.classList.remove("printing");
+ const old=window.onafterprint;window.onafterprint=()=>{restore();if(typeof old==="function")old()};
+ qr.onload=()=>{document.body.classList.add("printing");window.print();setTimeout(restore,1500)};
+ qr.onerror=()=>alert("No se pudo cargar el QR para impresión. Descarga el cartel en PNG.")
+}
+function safeExcelText(value){
+ const s=String(value??"");
+ return /^[=+@\-\t\r]/.test(s)?"'"+s:s
+}
+function addExcelHeader(sheet){
+ sheet.getRow(1).font={bold:true,color:{argb:"FFFFFFFF"}};
+ sheet.getRow(1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF004AA1"}};
+ sheet.getRow(1).height=24;
+ sheet.views=[{state:"frozen",ySplit:1}];
+ sheet.autoFilter={from:{row:1,column:1},to:{row:1,column:sheet.columnCount}};
+ sheet.getRow(1).alignment={vertical:"middle",wrapText:true};
+}
+async function descargarExcel(){
+ const button=$("export"),text0=button.textContent;button.disabled=true;button.textContent="Generando Excel…";
+ try {
+  if(typeof ExcelJS==="undefined")throw new Error("No se pudo cargar la librería ExcelJS. Comprueba la conexión.");
+  const records=filtered(),count=records.length;
+  const wb=new ExcelJS.Workbook();wb.creator="Bienestar Institucional";wb.created=new Date();wb.modified=new Date();
+  wb.subject="Evaluación anónima de satisfacción del Club Campestre de Pereira";
+  const data=wb.addWorksheet("Valoraciones");
+  data.columns=[{header:"Fecha",key:"fecha",width:22},{header:"Cargo evaluado",key:"cargo",width:48},{header:"Área colaborador",key:"area",width:28},{header:"Puntuación (1-5)",key:"calificacion",width:21},{header:"Calificación",key:"etiqueta",width:18},{header:"Satisfactoria",key:"satisfecha",width:18},{header:"Comentarios y observaciones",key:"comentario",width:72}];
+  records.forEach(v=>data.addRow({fecha:new Date(v.creado_en),cargo:nameBy(catalog.cargos,v.cargo_id),area:nameBy(catalog.areas,v.area_id),calificacion:v.calificacion,etiqueta:labels[v.calificacion-1],satisfecha:v.calificacion>=4?"Sí":"No",comentario:safeExcelText(v.comentario||"")}));
+  addExcelHeader(data);data.getColumn("fecha").numFmt="dd/mm/yyyy hh:mm";data.getColumn("comentario").alignment={wrapText:true,vertical:"top"};
+  const sum=wb.addWorksheet("Indicadores");
+  sum.columns=[{header:"Indicador",key:"indicador",width:53},{header:"Resultado",key:"resultado",width:22}];addExcelHeader(sum);
+  function indicator(label,value,format=""){const row=sum.addRow([label,value]);if(format)row.getCell(2).numFmt=format;}
+  indicator("Fecha de exportación",new Date().toLocaleString("es-CO",{timeZone:"America/Bogota"}));
+  indicator("Total de evaluaciones",count);
+  const good=records.filter(v=>v.calificacion>=4).length;
+  indicator("Respuestas satisfactorias (Buena y Excelente)",good);
+  indicator("Porcentaje de satisfacción",count?good/count:0,"0.0%");
+  indicator("Promedio en escala de 1 a 5",count?records.reduce((t,v)=>t+v.calificacion,0)/count:0,"0.00");
+  indicator("Comentarios recibidos",records.filter(v=>v.comentario?.trim()).length);
+  labels.forEach((name,i)=>{const num=records.filter(v=>v.calificacion===i+1).length;indicator("Cantidad "+name,num);indicator("Porcentaje "+name,count?num/count:0,"0.0%")});
+  indicator("Nota","Datos filtrados al momento de la descarga. Excel no se sincroniza automáticamente.");
+  const columns=[
+   {header:"Categoría",key:"nombre",width:54},
+   {header:"Evaluaciones",key:"total",width:19},
+   {header:"Excelente",key:"excelente",width:17},
+   {header:"Buena",key:"buena",width:16},
+   {header:"Neutra",key:"neutra",width:16},
+   {header:"Regular",key:"regular",width:17},
+   {header:"Mala",key:"mala",width:16},
+   {header:"Satisfacción",key:"satisfaccion",width:18},
+   {header:"Promedio / 5",key:"promedio",width:18}
+  ];
+  function breakdown(sheetName,list,idKey){
+   const sheet=wb.addWorksheet(sheetName);sheet.columns=columns;
+   list.forEach(item=>{
+    const group=records.filter(v=>v[idKey]===item.id),total=group.length;
+    const n=level=>group.filter(v=>v.calificacion===level).length;
+    sheet.addRow({nombre:item.nombre,total,excelente:n(5),buena:n(4),neutra:n(3),regular:n(2),mala:n(1),
+     satisfaccion:total?(n(4)+n(5))/total:null,
+     promedio:total?group.reduce((t,v)=>t+v.calificacion,0)/total:null
+    })
+   });
+   addExcelHeader(sheet);sheet.getColumn("satisfaccion").numFmt="0.0%";sheet.getColumn("promedio").numFmt="0.00";
+  }
+  breakdown("Por cargo",catalog.cargos,"cargo_id");
+  breakdown("Por área",catalog.areas,"area_id");
+  const comments=wb.addWorksheet("Comentarios");
+  comments.columns=[{header:"Fecha",key:"fecha",width:22},{header:"Cargo",key:"cargo",width:52},{header:"Área",key:"area",width:30},{header:"Calificación",key:"calificacion",width:17},{header:"Comentario",key:"comentario",width:85}];
+  records.filter(v=>v.comentario?.trim()).forEach(v=>comments.addRow({fecha:new Date(v.creado_en),cargo:nameBy(catalog.cargos,v.cargo_id),area:nameBy(catalog.areas,v.area_id),calificacion:labels[v.calificacion-1],comentario:safeExcelText(v.comentario)}));
+  addExcelHeader(comments);comments.getColumn("fecha").numFmt="dd/mm/yyyy hh:mm";comments.getColumn("comentario").alignment={wrapText:true,vertical:"top"};
+  const file=await wb.xlsx.writeBuffer();
+  const blob=new Blob([file],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  const href=URL.createObjectURL(blob),a=document.createElement("a");a.href=href;
+  a.download="Calificaciones_Bienestar_"+new Date().toISOString().slice(0,10)+".xlsx";
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(href),60000)
+ }catch(error){console.error("Error al exportar calificaciones",error);alert("No se pudo descargar el Excel: "+error.message)}
+ finally {button.disabled=false;button.textContent=text0}
+}
+$("export").onclick=descargarExcel;
 setInterval(()=>{if(token&&!$("dashboard").classList.contains("hide"))loadResults()},60000);
 init();
 })();
