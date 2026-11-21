@@ -14,13 +14,16 @@ Encuesta anónima de satisfacción para Bienestar Institucional del Club Campest
 - Código backend: `supabase/functions/calificaciones-bienestar/index.ts`
 
 ## Publicación
-En GitHub, abrir **Settings > Pages** y escoger **Deploy from a branch**, rama **main**, carpeta **/(root)**. Una vez activo, comprobar:
+Cada commit a la rama **main** ejecuta automáticamente el workflow `.github/workflows/deploy.yml` de GitHub Actions.
+El último despliegue comprobado en Actions terminó correctamente. URL prevista del sitio:
 https://mrprogramer1997.github.io/Calificaciones-Bienestar/
 
-El acceso administrativo se encuentra en:
+El acceso administrativo está en:
 https://mrprogramer1997.github.io/Calificaciones-Bienestar/#admin
 
-Los seis enlaces públicos usan `?cargo=<slug>`. Se puede descargar los QR desde el dashboard o usar el paquete entregado aparte. Probar un QR antes de imprimir el lote.
+Si Pages se deshabilita, configurar en GitHub **Settings → Pages → Source: GitHub Actions**.
+
+Los seis enlaces públicos usan `?cargo=<slug>`. Se pueden obtener los QR desde el dashboard o desde el paquete entregado aparte. Verificar cada código antes de imprimir.
 
 ## Indicadores
 - Evaluaciones totales, promedio (1-5), distribución de respuestas y porcentaje de satisfacción.
