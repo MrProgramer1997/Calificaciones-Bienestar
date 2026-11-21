@@ -1,4 +1,4 @@
-name: Publicar Calificaciones Bienestar
+name: Validar Calificaciones Bienestar
 
 on:
   push:
@@ -7,19 +7,10 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "github-pages"
-  cancel-in-progress: true
 
 jobs:
-  deploy:
+  validar:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Descargar codigo
         uses: actions/checkout@v6
@@ -55,12 +46,3 @@ jobs:
             "https://wcubfrmfylvrdwweothd.supabase.co/functions/v1/calificaciones-bienestar?action=results")
           test "$status" = "401"
           echo "OK: los resultados no son publicos"
-      - name: Preparar GitHub Pages
-        uses: actions/configure-pages@v5
-      - name: Subir archivos del sitio
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: '.'
-      - name: Publicar
-        id: deployment
-        uses: actions/deploy-pages@v4
