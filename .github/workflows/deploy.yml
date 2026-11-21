@@ -23,6 +23,21 @@ jobs:
     steps:
       - name: Descargar codigo
         uses: actions/checkout@v6
+      - name: Verificar interfaz y sintaxis JavaScript
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path('index.html').read_text(encoding='utf-8')
+          scripts = [s for s in re.findall(r'<script(?:\\s[^>]*)?>([\\s\\S]*?)</script>', html, re.I) if s.strip()]
+          assert len(scripts) == 1, 'Debe existir exactamente un script propio'
+          for key in ('mostEvaluatedArea','bestArea','worstArea','byAreaVolume','byAreaSatisfaction','export','qrGrid','printSheet'):
+              assert 'id="'+key+'"' in html, 'Falta el indicador '+key
+          assert 'function descargarExcel()' in scripts[0]
+          assert 'function renderAreaInsights()' in scripts[0]
+          Path('/tmp/bienestar-inline.js').write_text(scripts[0], encoding='utf-8')
+          PY
+          node --check /tmp/bienestar-inline.js
       - name: Comprobar API de Supabase y permisos
         run: |
           curl --fail --silent --show-error --retry 3 --retry-delay 3 --max-time 30 \
