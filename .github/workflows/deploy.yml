@@ -26,6 +26,13 @@ jobs:
               assert 'id="'+key+'"' in html, 'Falta el indicador '+key
           assert 'function descargarExcel()' in scripts[0]
           assert 'function renderAreaInsights()' in scripts[0]
+          style = Path('assets/experience.css')
+          assert style.is_file(), 'No se incluyo la hoja de estilos'
+          css = style.read_text(encoding='utf-8')
+          assert '@media(prefers-reduced-motion:reduce)' in css, 'Faltan ajustes de accesibilidad para movimiento'
+          assert 'assets/experience.css' in html, 'No se carga la hoja de estilos'
+          for fragment in ('hero-art','ui-smile','ui-chart','survey-card','icon-sprite'):
+              assert fragment in html, 'Falta componente visual '+fragment
           Path('/tmp/bienestar-inline.js').write_text(scripts[0], encoding='utf-8')
           PY
           node --check /tmp/bienestar-inline.js

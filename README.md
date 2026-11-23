@@ -6,6 +6,7 @@ Encuesta anónima de satisfacción para Bienestar Institucional del Club Campest
 - Web estática en HTML, CSS y JavaScript, compatible con GitHub Pages.
 - Base de datos PostgreSQL y función Edge en Supabase.
 - Panel administrativo con acceso protegido y descarga de Excel (.xlsx).
+- Interfaz visual animada con SVG nativo y CSS. Incluye caritas interactivas, iconos flotantes y animación de indicadores; respeta `prefers-reduced-motion` y no carga logos ajenos.
 
 ## Recursos exclusivos
 - GitHub: https://github.com/MrProgramer1997/Calificaciones-Bienestar
