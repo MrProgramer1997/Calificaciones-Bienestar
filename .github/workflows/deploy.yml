@@ -26,6 +26,11 @@ jobs:
               assert 'id="'+key+'"' in html, 'Falta el indicador '+key
           assert 'function descargarExcel()' in scripts[0]
           assert 'function renderAreaInsights()' in scripts[0]
+          assert 'function prepararNuevaEvaluacion()' in scripts[0], 'Falta reiniciar el formulario tras un envío'
+          assert 'if(enviandoEvaluacion)return' in scripts[0], 'Falta bloqueo contra doble clic durante el envío'
+          assert 'mostrarConfirmacion()' in scripts[0], 'Falta confirmación después del envío'
+          assert 'Calificar otra atención' in html, 'Falta botón para repetir una evaluación'
+          assert 'id="faces"' in html, 'Se perdieron las calificaciones'
           style = Path('assets/experience.css')
           assert style.is_file(), 'No se incluyo la hoja de estilos'
           css = style.read_text(encoding='utf-8')
