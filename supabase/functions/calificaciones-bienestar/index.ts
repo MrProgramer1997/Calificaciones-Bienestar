@@ -26,20 +26,20 @@ Deno.serve(async req=>{
    const v=await req.json(); if(v.website)return reply({ok:true});
    const area=Number(v.area_id),cargo=Number(v.cargo_id),rating=Number(v.calificacion);
    const comentario=typeof v.comentario==="string"?v.comentario.trim():"";
-   // El nombre solo se guarda cuando el colaborador decide proporcionarlo.
-   if(v.nombre_colaborador!=null && typeof v.nombre_colaborador!=="string"){
+   // El nombre del colaborador es obligatorio en cada nueva evaluación.
+   if(typeof v.nombre_colaborador!=="string"){
     return reply({error:"Nombre del colaborador inválido"},400);
    }
    const nombre=typeof v.nombre_colaborador==="string"
     ? v.nombre_colaborador.trim().replace(/\s+/g," ")
     : "";
-   if(nombre && (nombre.length<2||nombre.length>120||/[\u0000-\u001f\u007f]/u.test(nombre))){
+   if(nombre.length<2||nombre.length>120||/[\u0000-\u001f\u007f]/u.test(nombre)){
     return reply({error:"Ingresa un nombre válido de 2 a 120 caracteres"},400);
    }
    if(!Number.isInteger(area)||!Number.isInteger(cargo)||!Number.isInteger(rating)||![1,2,4,5].includes(rating)||comentario.length>2000)return reply({error:"Datos de evaluación inválidos"},400);
    const [a,b]=await Promise.all([db.from("cargos_bienestar").select("id,persona_nombre").eq("id",cargo).eq("activo",true).maybeSingle(),db.from("areas_colaboradores").select("id").eq("id",area).eq("activo",true).maybeSingle()]);
    if(!a.data?.persona_nombre||!b.data)return reply({error:"Persona o área no disponibles"},400);
-   const {error}=await db.from("valoraciones").insert({cargo_id:cargo,area_id:area,persona_evaluada:a.data.persona_nombre,nombre_colaborador:nombre||null,calificacion:rating,comentario:comentario||null});
+   const {error}=await db.from("valoraciones").insert({cargo_id:cargo,area_id:area,persona_evaluada:a.data.persona_nombre,nombre_colaborador:nombre,calificacion:rating,comentario:comentario||null});
    if(error)return reply({error:"No se pudo guardar la evaluación"},500);
    return reply({ok:true});
   }
