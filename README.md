@@ -53,5 +53,8 @@ Los seis enlaces públicos usan `?cargo=<slug>`. El dashboard identifica cada QR
 4. Si se necesita un Excel siempre sincronizado, integrar almacenamiento en OneDrive/SharePoint con proceso de actualización, en lugar del archivo descargado.
 5. El Excel exportado incluye hojas de resumen y datos filtrables; los gráficos interactivos se visualizan en el dashboard web.
 
+## Confidencialidad de las respuestas
+La interfaz identifica la **encuesta como confidencial**, no como anónima. El nombre es obligatorio y las respuestas pueden ser vistas en el panel administrativo y exportadas en Excel por administradores autorizados. Debe controlarse también el uso y la distribución de los Excel exportados. No se modificaron permisos, datos o autenticación con este cambio de presentación.
+
 ## Nombre obligatorio del colaborador
 El nombre completo se solicita siempre antes de enviar la evaluación (2 a 120 caracteres). Se eliminó el control opcional. La función Edge valida el nombre y rechaza solicitudes que lo omitan. Una restricción SQL `CHECK ... NOT VALID` impide nuevas valoraciones sin nombre y preserva las evaluaciones anteriores que no lo registraron. El dato aparece en el panel administrativo y en los Excel autorizados. La captura del nombre no garantiza por sí misma la identidad de quien responde.
