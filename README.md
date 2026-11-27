@@ -31,7 +31,7 @@ Los seis enlaces públicos usan `?cargo=<slug>`. El dashboard identifica cada QR
 ## Indicadores
 - Opciones nuevas: Mala (1), Regular (2), Buena (4), Excelente (5). Se retiró Neutra (3) de nuevas evaluaciones y de los indicadores visibles.
 - Se conserva el valor numérico original para no alterar datos históricos. En caso de valores 3 anteriores, se reconocen como registros históricos en la exportación.
-- Cada nueva valoración almacena también el nombre de la persona al momento de responder, sin modificar respuestas previas.
+- Cada nueva valoración almacena también el nombre de la persona al momento de responder, sin modificar respuestas previas. Las calificaciones antiguas sin persona registrada siguen en el consolidado general, pero no se atribuyen a empleados actuales en los indicadores por persona.
 - Evaluaciones totales, promedio (1-5), distribución de respuestas y porcentaje de satisfacción.
 - Satisfacción = (calificaciones de 4 o 5 / evaluaciones recibidas) * 100.
 - Filtros por persona evaluada, área y fechas; observaciones; comparación de áreas con mayor volumen, mayor satisfacción y menor satisfacción.
