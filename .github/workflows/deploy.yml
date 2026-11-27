@@ -27,6 +27,10 @@ jobs:
           assert 'function descargarExcel()' in scripts[0]
           assert 'function renderAreaInsights()' in scripts[0]
           assert 'function prepararNuevaEvaluacion()' in scripts[0], 'Falta reiniciar el formulario tras un envío'
+          assert 'availableScores=[1,2,4,5]' in scripts[0], 'La escala neutra debe estar retirada'
+          assert 'id="evaluado"' in html, 'Falta el selector de personas antes del área'
+          assert 'function evaluatedName(v)' in scripts[0], 'Los registros deben conservar trazabilidad por persona'
+          assert 'function descargarExcel()' in scripts[0], 'No debe perderse la exportación'
           assert 'if(enviandoEvaluacion)return' in scripts[0], 'Falta bloqueo contra doble clic durante el envío'
           assert 'mostrarConfirmacion()' in scripts[0], 'Falta confirmación después del envío'
           assert 'Calificar otra atención' in html, 'Falta botón para repetir una evaluación'
@@ -52,6 +56,9 @@ jobs:
               data = json.load(f)
           assert len(data.get('cargos', [])) == 6, "No se recuperaron los seis cargos"
           assert len(data.get('areas', [])) == 20, "El catalogo de areas no esta disponible"
+          personas = [c.get('persona_nombre') for c in data['cargos']]
+          assert all(isinstance(n,str) and n.strip() for n in personas), 'Hay personas sin nombre'
+          assert len(set(personas)) == 6, 'Se esperan seis personas distintas'
           print("OK: seis cargos y veinte areas disponibles")
           PY
           status=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 \

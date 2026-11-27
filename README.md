@@ -19,6 +19,8 @@ La aplicación se publica automáticamente mediante **GitHub Pages (publicación
 Sitio web:
 https://mrprogramer1997.github.io/Calificaciones-Bienestar/
 
+Los seis QR conservan sus enlaces por cargo, pero el formulario muestra las seis personas por nombre, preselecciona a la persona del QR y después permite elegir el área del colaborador.
+
 El acceso administrativo está en:
 https://mrprogramer1997.github.io/Calificaciones-Bienestar/#admin
 
@@ -27,9 +29,12 @@ Si Pages se deshabilita, comprobar en GitHub **Settings → Pages → Deploy fro
 Los seis enlaces públicos usan `?cargo=<slug>`. El dashboard identifica cada QR con su cargo en pantalla y permite imprimir el cartel **sin mostrar ese cargo**. También se entregaron seis carteles PNG independientes con los códigos QR verificados, sin logotipo ficticio ni nombres impresos.
 
 ## Indicadores
+- Opciones nuevas: Mala (1), Regular (2), Buena (4), Excelente (5). Se retiró Neutra (3) de nuevas evaluaciones y de los indicadores visibles.
+- Se conserva el valor numérico original para no alterar datos históricos. En caso de valores 3 anteriores, se reconocen como registros históricos en la exportación.
+- Cada nueva valoración almacena también el nombre de la persona al momento de responder, sin modificar respuestas previas.
 - Evaluaciones totales, promedio (1-5), distribución de respuestas y porcentaje de satisfacción.
 - Satisfacción = (calificaciones de 4 o 5 / evaluaciones recibidas) * 100.
-- Filtros por cargo, área y fechas; observaciones; comparación de áreas con mayor volumen, mayor satisfacción y menor satisfacción.
+- Filtros por persona evaluada, área y fechas; observaciones; comparación de áreas con mayor volumen, mayor satisfacción y menor satisfacción.
 - Exportación Excel (.xlsx) con hojas Valoraciones, Indicadores, Por cargo, Por área y Comentarios; exporta todos los registros filtrados.
 - Dashboard web refresca cada 60 segundos. Excel descargado es una instantánea, no un archivo sincronizado en tiempo real.
 
