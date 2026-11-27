@@ -31,9 +31,9 @@ Deno.serve(async req=>{
     return reply({error:"Nombre del colaborador inválido"},400);
    }
    const nombre=typeof v.nombre_colaborador==="string"
-    ? v.nombre_colaborador.trim().replace(/\\s+/g," ")
+    ? v.nombre_colaborador.trim().replace(/\s+/g," ")
     : "";
-   if(nombre && (nombre.length<2||nombre.length>120||/[\\u0000-\\u001f\\u007f]/u.test(nombre))){
+   if(nombre && (nombre.length<2||nombre.length>120||/[\u0000-\u001f\u007f]/u.test(nombre))){
     return reply({error:"Ingresa un nombre válido de 2 a 120 caracteres"},400);
    }
    if(!Number.isInteger(area)||!Number.isInteger(cargo)||!Number.isInteger(rating)||![1,2,4,5].includes(rating)||comentario.length>2000)return reply({error:"Datos de evaluación inválidos"},400);
