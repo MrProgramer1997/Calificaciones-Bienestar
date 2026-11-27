@@ -185,7 +185,7 @@ $("surveyForm").onsubmit=async e=>{
   return;
  }
  const mostrarNombre=!$("nameFields").classList.contains("hide");
- const nombre=mostrarNombre?$("collaboratorName").value.trim().replace(/\\s+/g," "):"";
+ const nombre=mostrarNombre?$("collaboratorName").value.trim().replace(/\s+/g," "):"";
  if(mostrarNombre && (nombre.length<2 || nombre.length>120)){
   err("surveyError","Ingresa tu nombre (de 2 a 120 caracteres) o desactiva la opción para responder sin él.");
   $("collaboratorName").focus();
