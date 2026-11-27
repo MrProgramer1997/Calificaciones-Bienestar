@@ -26,10 +26,20 @@ Deno.serve(async req=>{
    const v=await req.json(); if(v.website)return reply({ok:true});
    const area=Number(v.area_id),cargo=Number(v.cargo_id),rating=Number(v.calificacion);
    const comentario=typeof v.comentario==="string"?v.comentario.trim():"";
+   // El nombre solo se guarda cuando el colaborador decide proporcionarlo.
+   if(v.nombre_colaborador!=null && typeof v.nombre_colaborador!=="string"){
+    return reply({error:"Nombre del colaborador inválido"},400);
+   }
+   const nombre=typeof v.nombre_colaborador==="string"
+    ? v.nombre_colaborador.trim().replace(/\\s+/g," ")
+    : "";
+   if(nombre && (nombre.length<2||nombre.length>120||/[\\u0000-\\u001f\\u007f]/u.test(nombre))){
+    return reply({error:"Ingresa un nombre válido de 2 a 120 caracteres"},400);
+   }
    if(!Number.isInteger(area)||!Number.isInteger(cargo)||!Number.isInteger(rating)||![1,2,4,5].includes(rating)||comentario.length>2000)return reply({error:"Datos de evaluación inválidos"},400);
    const [a,b]=await Promise.all([db.from("cargos_bienestar").select("id,persona_nombre").eq("id",cargo).eq("activo",true).maybeSingle(),db.from("areas_colaboradores").select("id").eq("id",area).eq("activo",true).maybeSingle()]);
    if(!a.data?.persona_nombre||!b.data)return reply({error:"Persona o área no disponibles"},400);
-   const {error}=await db.from("valoraciones").insert({cargo_id:cargo,area_id:area,persona_evaluada:a.data.persona_nombre,calificacion:rating,comentario:comentario||null});
+   const {error}=await db.from("valoraciones").insert({cargo_id:cargo,area_id:area,persona_evaluada:a.data.persona_nombre,nombre_colaborador:nombre||null,calificacion:rating,comentario:comentario||null});
    if(error)return reply({error:"No se pudo guardar la evaluación"},500);
    return reply({ok:true});
   }
@@ -52,7 +62,7 @@ Deno.serve(async req=>{
    if(!await admin(req))return reply({error:"Acceso no autorizado"},401);
    const rows=[];let offset=0;
    while(true){
-    const {data,error}=await db.from("valoraciones").select("id,cargo_id,area_id,persona_evaluada,calificacion,comentario,creado_en").order("creado_en",{ascending:false}).range(offset,offset+999);
+    const {data,error}=await db.from("valoraciones").select("id,cargo_id,area_id,persona_evaluada,nombre_colaborador,calificacion,comentario,creado_en").order("creado_en",{ascending:false}).range(offset,offset+999);
     if(error)return reply({error:"No se pudieron consultar los resultados"},500);
     rows.push(...(data||[]));if((data||[]).length<1000)break;offset+=1000;if(offset>100000)return reply({error:"Superado límite de consulta"},413);
    }
