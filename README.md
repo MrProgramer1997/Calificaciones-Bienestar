@@ -1,11 +1,11 @@
 # Calificaciones Bienestar
 
-Encuesta de satisfacción para Bienestar Institucional del Club Campestre de Pereira. El colaborador puede proporcionar su nombre voluntariamente; por defecto no se recoge.
+Encuesta de satisfacción para Bienestar Institucional del Club Campestre de Pereira. El nombre completo del colaborador es obligatorio en cada nueva evaluación.
 
 ## Tecnología
 - Web estática en HTML, CSS y JavaScript, compatible con GitHub Pages.
 - Base de datos PostgreSQL y función Edge en Supabase.
-- Panel administrativo con acceso protegido y descarga de Excel (.xlsx). Los nombres voluntarios solo aparecen en vistas administrativas y exportaciones con sesión autorizada.
+- Panel administrativo con acceso protegido y descarga de Excel (.xlsx). Los nombres de los colaboradores solo aparecen en vistas administrativas y exportaciones con sesión autorizada.
 - Interfaz visual animada con SVG nativo y CSS. Incluye caritas interactivas, iconos flotantes y animación de indicadores; respeta `prefers-reduced-motion` y no carga logos ajenos.
 
 ## Recursos exclusivos
@@ -39,7 +39,7 @@ Los seis enlaces públicos usan `?cargo=<slug>`. El dashboard identifica cada QR
 - Dashboard web refresca cada 60 segundos. Excel descargado es una instantánea, no un archivo sincronizado en tiempo real.
 
 ## Seguridad
-- Encuesta sin inicio de sesión; el colaborador puede activar "Agregar mi nombre (opcional)" y entonces su nombre queda en la valoración. Si no lo proporciona, el campo se guarda como NULL.
+- Encuesta sin inicio de sesión, pero con nombre completo del colaborador obligatorio para cada nuevo envío. Las valoraciones históricas sin nombre se conservan intactas.
 - La recepción pública usa una función Edge que valida cargo, área, calificación y longitud de comentarios.
 - Tablas protegidas por RLS; el frontend no tiene credenciales de servicio.
 - Acceso administrativo con contraseña bcrypt (hash), token temporal y bloqueo de intentos.
@@ -53,5 +53,5 @@ Los seis enlaces públicos usan `?cargo=<slug>`. El dashboard identifica cada QR
 4. Si se necesita un Excel siempre sincronizado, integrar almacenamiento en OneDrive/SharePoint con proceso de actualización, en lugar del archivo descargado.
 5. El Excel exportado incluye hojas de resumen y datos filtrables; los gráficos interactivos se visualizan en el dashboard web.
 
-## Nombre opcional del colaborador
-Se retiró la expresión «confidencial» de la interfaz. El botón «Agregar mi nombre (opcional)» permite introducir un nombre de 2 a 120 caracteres, o responder sin nombre. El formulario informa que el nombre introducido será visible en el panel administrativo y el Excel. Se guarda en `public.valoraciones.nombre_colaborador`, sin alterar respuestas anteriores. No se captura automáticamente desde el navegador ni se publica mediante el endpoint de catálogos.
+## Nombre obligatorio del colaborador
+El nombre completo se solicita siempre antes de enviar la evaluación (2 a 120 caracteres). Se eliminó el control opcional. La función Edge valida el nombre y rechaza solicitudes que lo omitan. Una restricción SQL `CHECK ... NOT VALID` impide nuevas valoraciones sin nombre y preserva las evaluaciones anteriores que no lo registraron. El dato aparece en el panel administrativo y en los Excel autorizados. La captura del nombre no garantiza por sí misma la identidad de quien responde.
